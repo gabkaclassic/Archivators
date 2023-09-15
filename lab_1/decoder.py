@@ -1,4 +1,4 @@
-from os.path import isdir, isfile, dirname, join
+from os.path import isfile, dirname, join
 from os import makedirs
 import re
 from .file_utils import modes, to_int, to_str
@@ -20,10 +20,15 @@ class Decoder:
                 for number_file in range(self.archive_size):
                     print(content[offset])
                     try:
+                        print(content[offset])
                         size = to_int(to_str(content[offset]))
                     except:
-                        offset -= 1
-                        size = to_int(to_str(content[offset]))
+                        try:
+                            offset -= 1
+                            size = to_int(to_str(content[offset]))
+                        except:
+                            offset += 2
+                            size = to_int(to_str(content[offset]))
                     offset += 1
 
                     rel_path = to_str(content[offset])

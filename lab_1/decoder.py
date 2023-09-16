@@ -5,7 +5,9 @@ from .file_utils import modes, to_int, to_str
 
 
 class Decoder:
-
+    available_versions=[
+        '1.0.0',
+    ]
     def read_archive(self):
         path = 'archives/a.mrp' #self._input_path()
         output = 'outputs/info' #self._output_path()
@@ -18,9 +20,9 @@ class Decoder:
         if self._check_header(header):
             if self.decode_mode[0] == 0:
                 for number_file in range(self.archive_size):
-                    print(content[offset])
+                    # print(content[offset])
                     try:
-                        print(content[offset])
+                        # print(content[offset])
                         size = to_int(to_str(content[offset]))
                     except:
                         try:
@@ -32,7 +34,7 @@ class Decoder:
                     offset += 1
 
                     rel_path = to_str(content[offset])
-                    print(rel_path)
+                    # print(rel_path)
                     offset += 1
 
                     file_content = content[offset: offset + size]
@@ -43,11 +45,16 @@ class Decoder:
                     makedirs(path_dir, exist_ok=True)
                     with open(path_file, 'wb') as new_file:
                         r = new_file.writelines(file_content)
-                        print(r)
+                        # print(r)
     def _check_header(self, header):
         metadata = header.split('|')
         self.format = to_str(metadata[0])
+        if self.format != 'mrp':
+            raise Exception("Invalid header format")
         self.version = to_str(metadata[1])
+        # print(self.version)
+        if self.version not in Decoder.available_versions:
+            raise Exception('Invalid version')
         self.decode_mode = [to_int(to_str(mode)) for mode in metadata[2].split(',')]
         self.archive_size = to_int(metadata[3])
 

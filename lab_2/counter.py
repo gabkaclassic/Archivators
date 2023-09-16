@@ -89,15 +89,15 @@ def is_russian(octet_frequencies):
             continue
 
 
-file_path = '/home/errodion/Projects/Encoding/otik/labs-files/Файлы в разных форматах/beep.ogg'
+# file_path = '/home/errodion/Projects/Encoding/otik/labs-files/Файлы в разных форматах/beep.ogg'
 # file_path = '/home/errodion/Projects/Encoding/otik/labs-files/Файлы в формате простого текста — utf8/Rewards and Fairies, by Rudyard Kipling.txt'
-# file_path = '/home/errodion/Projects/Encoding/otik/labs-files/Файлы в формате простого текста — кодировки разные/Алфавит — koi8r.txt'
+file_path = '/home/errodion/Projects/Encoding/otik/labs-files/Файлы в формате простого текста — кодировки разные/Алфавит — koi8r.txt'
 
 if os.path.exists(file_path):
-    print('---|ALL|---')
-    calculate_all(file_path)
+    # print('---|ALL|---')
+    # calculate_all(file_path)
     # print('---|UTF-8|---')
     # calculate_utf_8(file_path)
-    # analyze_file(file_path)
+    analyze_file(file_path)
 else:
     print("File not found")

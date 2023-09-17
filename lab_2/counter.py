@@ -8,6 +8,12 @@ pattern = re.compile(r'[а-яА-ЯёЁ]')
 def read_content(path, mode='all'):
     with open(path, 'rb') as file:
         content = file.read()
+        for encoding_name in ['utf-8', 'cp1251', 'koi8-r', 'utf-16']:
+            try:
+                text = bytes(content[:100]).decode(encoding_name)
+                print(f'ENCODING: {encoding_name}\n\n{text}')
+            except UnicodeDecodeError:
+                print('???')
 
     if mode == 'all':
         return content
@@ -79,19 +85,17 @@ def print_table(symbol_frequencies, probabilities, information):
 
 
 def is_russian(octet_frequencies):
-    for encoding_name in ['utf-8', 'cp1251', 'koi8-r']:
+    for encoding_name in ['utf-8', 'cp1251', 'koi8-r', 'utf-16', 'iso']:
         try:
             text = bytes(octet_frequencies.keys()).decode(encoding_name)
-            if pattern.search(text):
-                print(text)
-                print(f"Russian text (encoding - {encoding_name})")
+            print(f'ENCODING: {encoding_name}\n\n{text}')
         except UnicodeDecodeError:
-            continue
+            print('???')
 
 
 # file_path = '/home/errodion/Projects/Encoding/otik/labs-files/Файлы в разных форматах/beep.ogg'
-# file_path = '/home/errodion/Projects/Encoding/otik/labs-files/Файлы в формате простого текста — utf8/Rewards and Fairies, by Rudyard Kipling.txt'
-file_path = '/home/errodion/Projects/Encoding/otik/labs-files/Файлы в формате простого текста — кодировки разные/Алфавит — koi8r.txt'
+file_path = '/home/errodion/PycharmProjects/EncodeLabs/outputs/info/Варианты 2 — определение кодировки простого текста/3.txt\n'
+# file_path = '/home/errodion/Projects/Encoding/otik/labs-files/Файлы в формате простого текста — кодировки разные/Алфавит — koi8r.txt'
 
 if os.path.exists(file_path):
     # print('---|ALL|---')

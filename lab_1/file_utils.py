@@ -1,15 +1,21 @@
+import pickle
+from decimal import Decimal
+
 modes = {
-    'none': 0
+    'none': 0,
+    'huff': 1,
+    'interval': 2,
 }
 
 
 class File:
 
-    def __init__(self, content=None, abs_path='', rel_path='', encode_mode=modes['none']):
+    def __init__(self, content=None, abs_path='', rel_path='', codes=None):
 
         if content is None:
             content = []
-        self.mode = encode_mode
+
+        self.codes = codes
         self.content = content
         self.abs_path = abs_path
         self.rel_path = rel_path
@@ -17,12 +23,13 @@ class File:
         self._get_size()
 
     def _get_size(self):
-        if self.mode == 0:
+        if isinstance(self.content, Decimal):
+            self.size = len(pickle.dumps(self.content))
+        else:
             self.size = len(self.content)
 
     def _get_string_size(self, string):
         return len(bytes(string))
-
 
 def bytes(value):
     return value.encode('utf-8')

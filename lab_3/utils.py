@@ -5,33 +5,61 @@ from decimal import Decimal, getcontext
 
 getcontext().prec = 100000
 
+
 class IntervalCompressor():
-    def compress(self, data):
+
+    @staticmethod
+    def compress(data):
         counts = Counter(data[:-1])
         length = len(data)
         if not length:
             return Decimal(0.0), dict(), 0
-        frequencies = {key: Decimal(value/length) for key, value in counts.items()}
-        frequencies[data[-1]] = Decimal(1/length)
-        frequencies = dict(sorted(frequencies.items(), key=lambda i: i[1], reverse=True))
-        ranges = self.get_ranges(frequencies)
+        frequencies = {key: Decimal(value / length) for key, value in counts.items()}
+        frequencies[data[-1]] = Decimal(1 / length)
+        sorted_keys = sorted(frequencies.keys(), key=lambda k: frequencies[k], reverse=True)
+        if sorted_keys == list(frequencies.keys()):
+            ranges = IntervalCompressor.get_ranges(frequencies)
+        else:
+            ranges = IntervalCompressor.get_ranges({k: frequencies[k] for k in sorted_keys})
         low = Decimal(0.0)
         high = Decimal(1.0)
-        i = 0
         for byte in data:
-            i += 1
             bounds = ranges[byte]
             low = bounds[0]
             high = bounds[1]
-            ranges = self.get_ranges(frequencies, low=low, high=high)
+            ranges = IntervalCompressor.get_ranges({k: frequencies[k] for k in sorted_keys}, low=low, high=high)
         compressed = (low, high)
-        return self.custom_round(compressed[0], compressed[1]), frequencies, len(data)
+        return IntervalCompressor.custom_round(compressed[0], compressed[1]), frequencies, len(data)
 
-    def decompress(self, data, frequencies, size):
+    @staticmethod
+    def custom_round(a, b):
+        assert a != b
+        sa = '{:.20f}'.format(a)
+        sb = '{:.20f}'.format(b)
+        for i in range(len(sa)):
+            if sa[i] != sb[i]:
+                ind = i
+                break
+        else:
+            return a
+        avg = int(round((int(sa[ind]) + int(sb[ind])) / 2))
+        return Decimal('{}{}{}'.format(str(a)[:2], sa[:ind], avg))
+
+    @staticmethod
+    def get_ranges(frequencies, low=Decimal(0.0), high=Decimal(1.0)):
+        ranges = dict()
+        length = high - low
+        for key, value in frequencies.items():
+            ranges[key] = (low, low + value * length)
+            low += value * length
+        return ranges
+
+    @staticmethod
+    def decompress(data, frequencies, size):
         decompressed = []
 
         frequencies = dict(sorted(frequencies.items(), key=lambda i: i[1], reverse=True))
-        ranges = self.get_ranges(frequencies)
+        ranges = IntervalCompressor.get_ranges(frequencies)
 
         while len(decompressed) < size:
             for value, bounds in ranges.items():
@@ -39,31 +67,10 @@ class IntervalCompressor():
                 high = bounds[1]
                 if low < data <= high:
                     decompressed.append(value)
-                    ranges = self.get_ranges(frequencies, low=low, high=high)
+                    ranges = IntervalCompressor.get_ranges(frequencies, low=low, high=high)
                     break
 
         return bytes(decompressed)
-
-    def custom_round(self, a, b):
-        assert a != b
-        sa = str(a)[2:]
-        sb = str(b)[2:]
-        for i in range(len(sa)):
-            if sa[i] != sb[i]:
-                ind = i
-                break
-        else:
-            return a
-        avg = int(round((int(sa[ind])+int(sb[ind]))/2))
-
-        return Decimal(str(a)[:2] + sa[:ind] + str(avg))
-    def get_ranges(self, frequencies, low=Decimal(0.0), high=Decimal(1.0)):
-        ranges = dict()
-        length = high - low
-        for key, value in frequencies.items():
-            ranges[key] = (low, low + value*length)
-            low += value * length
-        return ranges
 
 
 class HeapNode:
@@ -206,4 +213,3 @@ class HuffmanCompression:
         encoded_text = remove_padding(bit_string)
         decompressed_text = self.decode_text(encoded_text)
         return decompressed_text
-

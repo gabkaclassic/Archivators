@@ -46,7 +46,7 @@ class Encoder:
         self.modes.append(mode)
 
         with open(full_path, 'rb') as current_file:
-            codes, content, size = self._get_file_content(current_file)
+            codes, content, size = self._get_file_content(current_file, mode)
             if codes is None:
                 print(len(content))
                 file = File(content=content, abs_path=full_path, rel_path=rel)
@@ -75,9 +75,8 @@ class Encoder:
 
         return files
 
-    def _get_file_content(self, current_file):
-        mode = 1 if self.encoded_mode is None else self.mode
-        print(self.encoded_mode)
+    def _get_file_content(self, current_file, mode):
+
         if int(mode) == modes['none']:
             return None, current_file.read(), None
         elif int(mode) == modes['huff']:
@@ -100,8 +99,8 @@ class Encoder:
         return not split
 
     def create_archive(self):
-        paths = ['/home/errodion/PycharmProjects/EncodeLabs/files/test/1.txt',
-                 '/home/errodion/PycharmProjects/EncodeLabs/files/__init__.py']  # self._input_files()
+        paths = ['/home/errodion/PycharmProjects/EncodeLabs/files/test/1.txt',]
+                 # '/home/errodion/PycharmProjects/EncodeLabs/files/__init__.py']  # self._input_files()
         self.encoded_mode = self._get_mode()
         files = self._search_files(paths)
         print(self.modes)
